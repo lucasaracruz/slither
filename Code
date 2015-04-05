@@ -1,0 +1,342 @@
+import pygame
+import time
+import random
+
+pygame.init()
+
+white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+green = (0, 155, 0)
+blue = (20, 140, 220)
+brown = (193, 143, 42)
+
+back_ground = pygame.image.load('grama.jpg')
+ground = pygame.image.load('ground.png')
+
+display_width = 800
+display_height = 600
+
+button_width = 200
+button_height = 30
+
+gameDisplay = pygame.display.set_mode((display_width, display_height))
+pygame.display.set_caption('O jogo da Cobrinha')
+
+icon = pygame.image.load('icon.png')
+pygame.display.set_icon(icon)
+
+img = pygame.image.load('snake_head.png')
+appleimg = pygame.image.load('apple_sprite.png')
+
+FPS = 15
+clock = pygame.time.Clock()
+
+direction = "right"
+
+block_size = 20
+appleThickness = 30
+
+smallfont = pygame.font.SysFont("arial", 25)
+medfont = pygame.font.SysFont("arial", 50)
+largefont = pygame.font.SysFont("arial", 80)
+
+def text_to_button(msg, color, buttonx, buttony, buttonwidth, buttonheight, size = "small"):
+    textSurf, textRect = text_objects(msg, color, size)
+    textRect.center = ((buttonx + (buttonwidth / 2)), (buttony + (buttonheight / 2)))
+    gameDisplay.blit(textSurf, textRect)
+
+def pause():
+    paused = True
+
+    message_to_screen("Pausado", red, -200, 0, "large")
+
+    pygame.draw.rect(gameDisplay, white, [770, 10, block_size, block_size])
+    pygame.draw.line(gameDisplay, red, (770, 10), (790, 30), 7)
+    pygame.draw.line(gameDisplay, red, (790, 10), (770, 30), 7)
+
+    pygame.draw.rect(gameDisplay, green, [195, 350, button_width, button_height])
+    pygame.draw.rect(gameDisplay, green, [405, 350, button_width, button_height])
+    pygame.draw.rect(gameDisplay, red, [195, 400, (2 * button_width) + 10, button_height])
+
+    text_to_button("Opções", white, 195, 350, button_width, button_height)
+    text_to_button("Continuar", white, 405, 350, button_width, button_height)
+    text_to_button("Menu Inicial", white, 195, 400, (2 * button_width) + 10, button_height)
+
+    pygame.draw.rect(gameDisplay, brown, [770, 10, block_size, block_size])
+    pygame.draw.line(gameDisplay, red, (770, 10), (790, 30), 7)
+    pygame.draw.line(gameDisplay, red, (790, 10), (770, 30), 7)
+
+    pygame.display.update()
+    clock.tick(FPS)
+
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:
+                    paused = False
+
+                elif event.key == pygame.K_q:
+                    pygame.quit()
+                    quit()
+
+def score(score):
+    text = smallfont.render("Pontuação: " + str(score), True, black)
+    gameDisplay.blit(text, [0,0])
+
+def randAppleGen():
+    randAppleX = round(random.randrange(0, display_width - appleThickness))##/10.0) * 10.0
+    randAppleY = round(random.randrange(0, display_height - appleThickness))##/10.0) * 10.0
+
+    return randAppleX, randAppleY
+    
+def game_intro():
+    intro = True
+
+    while intro:
+
+        for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                        pygame.quit()
+                        quit()
+                        
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_c:
+                        intro = False
+
+                    elif event.key == pygame.K_q:
+                        pygame.quit()
+                        quit()
+
+                    elif event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        quit()    
+
+        gameDisplay.blit(back_ground, [0,0])
+
+        pygame.draw.rect(gameDisplay, green, [195, 350, button_width, button_height])
+        pygame.draw.rect(gameDisplay, green, [405, 350, button_width, button_height])
+        pygame.draw.rect(gameDisplay, red, [195, 400, (2 * button_width) + 10, button_height])
+        
+        message_to_screen("Bem Vindo", white, -200, 0, "large")
+        message_to_screen("ao", white, -140, 0, "large")
+        message_to_screen("Jogo da Cobrinha", red, -60, 0, "large")
+
+        text_to_button("Opções", white, 195, 350, button_width, button_height)
+        text_to_button("Como Jogar", white, 405, 350, button_width, button_height)
+        text_to_button("Jogar", white, 195, 400, (2 * button_width) + 10, button_height)
+
+        pygame.draw.rect(gameDisplay, blue, [770, 10, block_size, block_size])
+        pygame.draw.line(gameDisplay, red, (770, 10), (790, 30), 7)
+        pygame.draw.line(gameDisplay, red, (790, 10), (770, 30), 7)
+
+        pygame.display.update()
+
+        clock.tick(FPS)
+
+def how_to_play():
+    howToPlay = True
+
+    while howToPlay:
+        gameDisplay.blit(back_ground, [0,0])
+        
+        message_to_screen("Brinque com a minha cobra para fazê-la crescer.", black, 30, 0)
+        message_to_screen("Quanto mais você brincar, MAIOR FICA!", black, 70, 0)
+        message_to_screen("Use as setas do teclado para jogar", black, 120, 0)
+
+        pygame.draw.rect(gameDisplay, green, [195, 350, button_width, button_height])
+        pygame.draw.rect(gameDisplay, green, [405, 350, button_width, button_height])
+
+        text_to_button("Opções", white, 195, 350, button_width, button_height)
+        text_to_button("Jogar", white, 405, 350, button_width, button_height)
+
+        pygame.draw.rect(gameDisplay, white, [770, 10, block_size, block_size])
+        pygame.draw.line(gameDisplay, red, (770, 10), (790, 30), 7)
+        pygame.draw.line(gameDisplay, red, (790, 10), (770, 30), 7)
+
+        pygame.display.update()
+        clock.tick(FPS)
+        
+
+def snake(snakeList, block_size):
+    if direction == "right":
+        head = pygame.transform.rotate(img, 270)
+    elif direction == "left":
+        head = pygame.transform.rotate(img, 90)
+    elif direction == "up":
+        head = img
+    elif direction == "down":
+        head = pygame.transform.rotate(img, 180)
+
+    gameDisplay.blit(head, (snakeList[-1][0], snakeList[-1][1]))
+    
+    for XnY in snakeList[:-1]:
+        pygame.draw.rect(gameDisplay, green, [XnY[0], XnY[1], block_size, block_size])
+
+def text_objects(text, color, size):
+    if size == "small":
+        textSurface = smallfont.render(text, True, color)
+    elif size == "medium":
+        textSurface = medfont.render(text, True, color)
+    elif size == "large":
+        textSurface = largefont.render(text, True, color)
+    
+    return textSurface, textSurface.get_rect()
+
+def message_to_screen(msg, color, y_displace = 0, x_displace = 0, size = "small"):
+    textSurf, textRect = text_objects(msg, color, size)
+    textRect.center = (display_width/2) + x_displace, (display_height/2) + y_displace
+    gameDisplay.blit(textSurf, textRect)
+
+def gameLoop():
+    global direction
+
+    direction = "right"
+    
+    gameExit = False
+    gameOver = False
+
+    lead_x = display_width/2
+    lead_y = display_height/2
+
+    lead_x_change = block_size
+    lead_y_change = 0
+
+    snakeList = []
+    snakeLenght = 2
+
+    randAppleX, randAppleY = randAppleGen()
+    
+    while not gameExit:
+
+        if gameOver == True:
+            message_to_screen("Game Over", red, -50, 0, size = "large")
+
+            pygame.draw.rect(gameDisplay, green, [195, 350, button_width, button_height])
+            pygame.draw.rect(gameDisplay, green, [405, 350, button_width, button_height])
+            pygame.draw.rect(gameDisplay, red, [195, 400, (2 * button_width) + 10, button_height])
+
+            text_to_button("Opções", white, 195, 350, button_width, button_height)
+            text_to_button("Como Jogar", white, 405, 350, button_width, button_height)
+            text_to_button("Jogar", white, 195, 400, (2 * button_width) + 10, button_height)
+
+            pygame.draw.rect(gameDisplay, brown, [770, 10, block_size, block_size])
+            pygame.draw.line(gameDisplay, red, (770, 10), (790, 30), 7)
+            pygame.draw.line(gameDisplay, red, (790, 10), (770, 30), 7)
+        
+            pygame.display.update()
+            
+        while gameOver == True:
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                        gameExit = True
+                        gameOver = False
+                        
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        gameExit = True
+                        gameOver = False
+
+                    if event.key == pygame.K_c:
+                        gameLoop()
+            
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gameExit = True
+ 
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    if direction != "right":
+                        direction = "left"
+                        lead_y_change = 0
+                        lead_x_change = -block_size
+                elif event.key == pygame.K_RIGHT:
+                    if direction != "left":
+                        direction = "right"
+                        lead_y_change = 0
+                        lead_x_change = block_size
+                    
+                elif event.key == pygame.K_UP:
+                    if direction != "down":
+                        direction = "up"
+                        lead_x_change = 0
+                        lead_y_change = -block_size
+                elif event.key == pygame.K_DOWN:
+                    if direction != "up":
+                        direction = "down"
+                        lead_x_change = 0
+                        lead_y_change = block_size
+
+                elif event.key == pygame.K_p:
+                    pause()
+
+                elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
+
+        if lead_x > display_width - block_size:
+            lead_x = 0 - block_size
+            
+        elif lead_x < 0:
+            lead_x = display_width
+
+        elif lead_y > display_height - block_size:
+            lead_y = 0 - block_size
+            
+        elif lead_y < 0:
+            lead_y = display_height         
+            
+        
+        lead_x += lead_x_change
+        lead_y += lead_y_change
+
+        gameDisplay.blit(ground, [0,0])
+
+        gameDisplay.blit(appleimg, (randAppleX, randAppleY))
+        
+        snakeHead = []
+        snakeHead.append(lead_x)
+        snakeHead.append(lead_y)
+        snakeList.append(snakeHead)
+
+        if len(snakeList) > snakeLenght:
+            del snakeList[0]
+
+        for eachSegment in snakeList[:-1]:
+            if eachSegment == snakeHead:
+                gameOver = True
+        
+        snake(snakeList, block_size)
+
+        score(snakeLenght - 2)
+        
+        pygame.display.update()
+
+        if lead_x + block_size > randAppleX and lead_x < randAppleX + appleThickness:
+            if lead_y + block_size > randAppleY and lead_y < randAppleY + appleThickness:
+                randAppleX, randAppleY = randAppleGen()
+
+                snakeLenght += 1
+
+        if randAppleX + appleThickness > lead_x and randAppleX < lead_x + block_size:
+            if randAppleY + appleThickness > lead_y and randAppleY < lead_y + block_size:
+                randAppleX, randAppleY = randAppleGen()
+
+                snakeLenght += 1
+
+        pygame.draw.rect(gameDisplay, white, [770, 10, block_size, block_size])
+        pygame.draw.line(gameDisplay, red, (770, 10), (790, 30), 7)
+        pygame.draw.line(gameDisplay, red, (790, 10), (770, 30), 7)
+
+        clock.tick(FPS)
+        
+    pygame.quit()
+    quit()
+
+game_intro()
+gameLoop()
