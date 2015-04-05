@@ -1,0 +1,10 @@
+import cx_Freeze
+
+executables = [cx_Freeze.Executable("jogo da cobra.py")]
+
+cx_Freeze.setup(
+    name="Cobrinha",
+    options={"build_exe":{"packages":["pygame"], "include_files":["apple_sprite.png", "icon.png", "snake_head.png", "grama.jpg", "ground.png"]}},
+    description = "Jogo da Cobrinha",
+    executables = executables
+    )
